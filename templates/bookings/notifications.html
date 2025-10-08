@@ -1,0 +1,98 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Notifications - Te Whare Rūnanga{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="fas fa-bell"></i> Notifications</h1>
+        <p class="text-muted">Stay updated with your reservation activities</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for notification in page_obj %}
+    <div class="col-12 mb-3">
+        <div class="card {% if not notification.is_read %}border-primary{% endif %}">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-1 text-center">
+                        <i class="fas fa-{% if notification.notification_type == 'reservation_confirmed' %}check-circle text-success{% elif notification.notification_type == 'reservation_cancelled' %}times-circle text-danger{% elif notification.notification_type == 'reservation_reminder' %}clock text-warning{% else %}info-circle text-info{% endif %} fa-2x"></i>
+                    </div>
+                    <div class="col-md-8">
+                        <h6 class="card-title mb-1">
+                            {{ notification.get_notification_type_display }}
+                            {% if not notification.is_read %}
+                            <span class="badge bg-primary">New</span>
+                            {% endif %}
+                        </h6>
+                        <p class="card-text mb-1">{{ notification.message }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> {{ notification.created_at|date:"M d, Y H:i" }}
+                        </small>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <a href="{% url 'reservation_detail' notification.reservation.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i> View Reservation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="fas fa-bell-slash fa-3x mb-3"></i>
+            <h4>No notifications</h4>
+            <p>You don't have any notifications at the moment.</p>
+            <a href="{% url 'room_list' %}" class="btn btn-primary">Browse Rooms</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav aria-label="Notification pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: box-shadow 0.2s;
+    }
+    .card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .border-primary {
+        border-left: 4px solid #0d6efd !important;
+    }
+</style>
+{% endblock %}

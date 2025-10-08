@@ -1,0 +1,21 @@
+{
+  "builds": [
+    {
+      "src": "conference_room_booking/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.9"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "conference_room_booking/wsgi.py"
+    }
+  ],
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "conference_room_booking.settings"
+  }
+}
