@@ -88,9 +88,9 @@
                 <h5><i class="fas fa-calendar-check"></i> Quick Stats</h5>
             </div>
             <div class="card-body">
-                <p><strong>Total Reservations:</strong> {{ user.reservations.count }}</p>
-                <p><strong>Active Reservations:</strong> {{ user.reservations.filter.status='confirmed'|length }}</p>
-                <p><strong>Unread Notifications:</strong> {{ user.notifications.filter.is_read=False.count }}</p>
+                <p><strong>Total Reservations:</strong> {{ total_reservations }}</p>
+                <p><strong>Active Reservations:</strong> {{ active_reservations }}</p>
+                <p><strong>Unread Notifications:</strong> {{ unread_notifications }}</p>
             </div>
         </div>
         

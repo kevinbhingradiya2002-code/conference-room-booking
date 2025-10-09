@@ -43,12 +43,16 @@ class ReservationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        room_id = kwargs.pop('room_id', None)
         super().__init__(*args, **kwargs)
         
-        # Filter rooms to only show active ones
         self.fields['room'].queryset = Room.objects.filter(is_active=True)
         
-        # Set minimum datetime to current time
+        if room_id:
+            self.fields['room'].initial = room_id
+            self.fields['room'].widget = forms.HiddenInput()
+            self.fields['room'].required = False
+        
         now = timezone.now()
         self.fields['start_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
         self.fields['end_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
@@ -66,7 +70,6 @@ class ReservationForm(forms.ModelForm):
             if start_time < timezone.now():
                 raise forms.ValidationError("Cannot create reservation in the past.")
             
-            # Check if room is available
             if room and not room.is_available(start_time, end_time):
                 raise forms.ValidationError("Room is not available for the selected time period.")
 
@@ -86,7 +89,6 @@ class ReservationUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Set minimum datetime to current time
         now = timezone.now()
         self.fields['start_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
         self.fields['end_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
@@ -103,7 +105,6 @@ class ReservationUpdateForm(forms.ModelForm):
             if start_time < timezone.now():
                 raise forms.ValidationError("Cannot create reservation in the past.")
             
-            # Check if room is available (excluding current reservation)
             if not self.instance.room.is_available(start_time, end_time, self.instance):
                 raise forms.ValidationError("Room is not available for the selected time period.")
 
@@ -153,10 +154,8 @@ class AdminReservationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Filter rooms to only show active ones
         self.fields['room'].queryset = Room.objects.filter(is_active=True)
         
-        # Set minimum datetime to current time
         now = timezone.now()
         self.fields['start_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
         self.fields['end_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
@@ -174,7 +173,6 @@ class AdminReservationForm(forms.ModelForm):
             if start_time < timezone.now():
                 raise forms.ValidationError("Cannot create reservation in the past.")
             
-            # Check if room is available (excluding current reservation if updating)
             if room and not room.is_available(start_time, end_time, self.instance if self.instance.pk else None):
                 raise forms.ValidationError("Room is not available for the selected time period.")
 

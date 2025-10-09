@@ -16,7 +16,6 @@ from .forms import (
 
 
 def home(request):
-    """Home page with available rooms overview"""
     rooms = Room.objects.filter(is_active=True)[:6]
     upcoming_reservations = []
     
@@ -35,12 +34,10 @@ def home(request):
 
 
 def register(request):
-    """User registration"""
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Create user profile
             UserProfile.objects.create(user=user)
             messages.success(request, 'Registration successful! You can now log in.')
             return redirect('login')
@@ -51,7 +48,6 @@ def register(request):
 
 @login_required
 def room_list(request):
-    """List all available rooms with search functionality"""
     form = RoomSearchForm(request.GET)
     rooms = Room.objects.filter(is_active=True)
     
@@ -65,11 +61,9 @@ def room_list(request):
             rooms = rooms.filter(capacity__gte=capacity)
         
         if date and start_time and end_time:
-            # Combine date and time
             start_datetime = timezone.make_aware(datetime.combine(date, start_time))
             end_datetime = timezone.make_aware(datetime.combine(date, end_time))
             
-            # Filter rooms that are available during the specified time
             available_rooms = []
             for room in rooms:
                 if room.is_available(start_datetime, end_datetime):
@@ -89,17 +83,17 @@ def room_list(request):
 
 @login_required
 def room_detail(request, room_id):
-    """Room detail view with booking form"""
     room = get_object_or_404(Room, id=room_id, is_active=True)
     
     if request.method == 'POST':
-        form = ReservationForm(request.POST, user=request.user)
+        form = ReservationForm(request.POST, user=request.user, room_id=room.id)
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation.user = request.user
+            reservation.room = room
+            reservation.status = 'confirmed'
             reservation.save()
             
-            # Create notification
             Notification.objects.create(
                 user=request.user,
                 reservation=reservation,
@@ -109,10 +103,11 @@ def room_detail(request, room_id):
             
             messages.success(request, 'Reservation created successfully!')
             return redirect('reservation_detail', reservation.id)
+        else:
+            messages.error(request, 'Please check the form for errors.')
     else:
-        form = ReservationForm(user=request.user)
+        form = ReservationForm(user=request.user, room_id=room.id)
     
-    # Get upcoming reservations for this room
     upcoming_reservations = Reservation.objects.filter(
         room=room,
         start_time__gte=timezone.now(),
@@ -129,10 +124,8 @@ def room_detail(request, room_id):
 
 @login_required
 def reservation_list(request):
-    """User's reservation list"""
     reservations = Reservation.objects.filter(user=request.user).order_by('-start_time')
     
-    # Filter by status if provided
     status = request.GET.get('status')
     if status:
         reservations = reservations.filter(status=status)
@@ -150,14 +143,12 @@ def reservation_list(request):
 
 @login_required
 def reservation_detail(request, reservation_id):
-    """Reservation detail view"""
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
     return render(request, 'bookings/reservation_detail.html', {'reservation': reservation})
 
 
 @login_required
 def reservation_update(request, reservation_id):
-    """Update reservation"""
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
     
     if reservation.status == 'cancelled':
@@ -169,7 +160,6 @@ def reservation_update(request, reservation_id):
         if form.is_valid():
             form.save()
             
-            # Create notification
             Notification.objects.create(
                 user=request.user,
                 reservation=reservation,
@@ -190,7 +180,6 @@ def reservation_update(request, reservation_id):
 
 @login_required
 def reservation_cancel(request, reservation_id):
-    """Cancel reservation"""
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
     
     if reservation.status == 'cancelled':
@@ -201,7 +190,6 @@ def reservation_cancel(request, reservation_id):
         reservation.status = 'cancelled'
         reservation.save()
         
-        # Create notification
         Notification.objects.create(
             user=request.user,
             reservation=reservation,
@@ -217,8 +205,11 @@ def reservation_cancel(request, reservation_id):
 
 @login_required
 def profile(request):
-    """User profile view and edit"""
     profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
+    total_reservations = request.user.reservations.count()
+    active_reservations = request.user.reservations.filter(status='confirmed').count()
+    unread_notifications = Notification.objects.filter(user=request.user, is_read=False).count()
     
     if request.method == 'POST':
         form = UserProfileForm(request.POST, instance=profile)
@@ -229,15 +220,20 @@ def profile(request):
     else:
         form = UserProfileForm(instance=profile)
     
-    return render(request, 'bookings/profile.html', {'form': form, 'profile': profile})
+    context = {
+        'form': form, 
+        'profile': profile,
+        'total_reservations': total_reservations,
+        'active_reservations': active_reservations,
+        'unread_notifications': unread_notifications,
+    }
+    return render(request, 'bookings/profile.html', context)
 
 
 @login_required
 def notifications(request):
-    """User notifications"""
     notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
     
-    # Mark all as read
     notifications.update(is_read=True)
     
     paginator = Paginator(notifications, 20)
@@ -247,24 +243,19 @@ def notifications(request):
     return render(request, 'bookings/notifications.html', {'page_obj': page_obj})
 
 
-# Admin views
 @login_required
 def admin_dashboard(request):
-    """Admin dashboard"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
         messages.error(request, 'Access denied. Admin privileges required.')
         return redirect('home')
     
-    # Statistics
     total_rooms = Room.objects.filter(is_active=True).count()
     total_reservations = Reservation.objects.count()
     active_reservations = Reservation.objects.filter(status='confirmed').count()
     total_users = User.objects.count()
     
-    # Recent reservations
     recent_reservations = Reservation.objects.order_by('-created_at')[:10]
     
-    # Upcoming reservations
     upcoming_reservations = Reservation.objects.filter(
         start_time__gte=timezone.now(),
         status='confirmed'
@@ -283,7 +274,6 @@ def admin_dashboard(request):
 
 @login_required
 def admin_room_manage(request):
-    """Admin room management"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
         messages.error(request, 'Access denied. Admin privileges required.')
         return redirect('home')
@@ -294,14 +284,12 @@ def admin_room_manage(request):
 
 @login_required
 def admin_reservation_manage(request):
-    """Admin reservation management"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
         messages.error(request, 'Access denied. Admin privileges required.')
         return redirect('home')
     
     reservations = Reservation.objects.all().order_by('-start_time')
     
-    # Filter by status if provided
     status = request.GET.get('status')
     if status:
         reservations = reservations.filter(status=status)
@@ -319,7 +307,6 @@ def admin_reservation_manage(request):
 
 @login_required
 def admin_reservation_create(request):
-    """Admin create reservation for any user"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
         messages.error(request, 'Access denied. Admin privileges required.')
         return redirect('home')
@@ -331,7 +318,6 @@ def admin_reservation_create(request):
             reservation.created_by_admin = True
             reservation.save()
             
-            # Create notification for the user
             Notification.objects.create(
                 user=reservation.user,
                 reservation=reservation,
@@ -349,7 +335,6 @@ def admin_reservation_create(request):
 
 @login_required
 def admin_reservation_cancel(request, reservation_id):
-    """Admin cancel any reservation"""
     if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
         messages.error(request, 'Access denied. Admin privileges required.')
         return redirect('home')
@@ -360,7 +345,6 @@ def admin_reservation_cancel(request, reservation_id):
         reservation.status = 'cancelled'
         reservation.save()
         
-        # Create notification for the user
         Notification.objects.create(
             user=reservation.user,
             reservation=reservation,
@@ -374,10 +358,8 @@ def admin_reservation_cancel(request, reservation_id):
     return render(request, 'bookings/admin_reservation_cancel.html', {'reservation': reservation})
 
 
-# API views for AJAX
 @login_required
 def check_room_availability(request, room_id):
-    """Check room availability for given time period"""
     room = get_object_or_404(Room, id=room_id)
     start_time = request.GET.get('start_time')
     end_time = request.GET.get('end_time')

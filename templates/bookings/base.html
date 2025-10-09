@@ -83,13 +83,13 @@
                         {% if user.profile.is_admin %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-cog"></i> Admin
+                                <i class="fas fa-user-shield"></i> Manager Portal
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-                                <li><a class="dropdown-item" href="{% url 'admin_room_manage' %}">Manage Rooms</a></li>
-                                <li><a class="dropdown-item" href="{% url 'admin_reservation_manage' %}">Manage Reservations</a></li>
-                                <li><a class="dropdown-item" href="{% url 'admin_reservation_create' %}">Create Reservation</a></li>
+                                <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'admin_room_manage' %}"><i class="fas fa-door-open"></i> Manage Rooms</a></li>
+                                <li><a class="dropdown-item" href="{% url 'admin_reservation_manage' %}"><i class="fas fa-calendar-check"></i> Manage Reservations</a></li>
+                                <li><a class="dropdown-item" href="{% url 'admin_reservation_create' %}"><i class="fas fa-plus-circle"></i> Create Reservation</a></li>
                             </ul>
                         </li>
                         {% endif %}
@@ -97,11 +97,9 @@
                         <li class="nav-item">
                             <a class="nav-link notification-badge" href="{% url 'notifications' %}">
                                 <i class="fas fa-bell"></i>
-                                {% with unread_count=user.notifications.filter.is_read=False.count %}
-                                {% if unread_count > 0 %}
-                                <span class="notification-count">{{ unread_count }}</span>
+                                {% if user.is_authenticated and unread_notifications_count > 0 %}
+                                <span class="notification-count">{{ unread_notifications_count }}</span>
                                 {% endif %}
-                                {% endwith %}
                             </a>
                         </li>
                         

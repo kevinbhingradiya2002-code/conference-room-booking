@@ -72,6 +72,5 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_editable = ('is_admin',)
 
 
-# Unregister the default User admin and register our custom one
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
