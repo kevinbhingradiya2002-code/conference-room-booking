@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2895d35-a8a7-4e39-8f7e-a927dd1f1de8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Assignment.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Assignment.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookings/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookings/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookings/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookings/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookings/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookings/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookings/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookings/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookings/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookings/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conference_room_booking/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/conference_room_booking/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conference_room_booking/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/conference_room_booking/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/bookings/admin_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/bookings/admin_dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/bookings/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/bookings/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/bookings/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/bookings/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/bookings/room_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/bookings/room_detail.html" afterDir="false" />
-    </list>
+    <list default="true" id="d2895d35-a8a7-4e39-8f7e-a927dd1f1de8" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -69,7 +54,7 @@
       <option name="presentableId" value="Default" />
       <updated>1759903687680</updated>
       <workItem from="1759903688766" duration="3085000" />
-      <workItem from="1759968291432" duration="1156000" />
+      <workItem from="1759968291432" duration="1690000" />
     </task>
     <servers />
   </component>
