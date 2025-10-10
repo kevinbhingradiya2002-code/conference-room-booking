@@ -200,6 +200,21 @@ class Notification(models.Model):
         return f"{self.user.username} - {self.get_notification_type_display()}"
 
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    phone_number = models.CharField(max_length=20, blank=True)
+    department = models.CharField(max_length=100, blank=True)
+    is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
+
+    @property
+    def full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}".strip() or self.user.username
+
+
 class Reminder(models.Model):
     REMINDER_TYPES = [
         ('24h', '24 Hours Before'),
@@ -228,10 +243,9 @@ class Reminder(models.Model):
             # Create notification
             Notification.objects.create(
                 user=self.reservation.user,
-                notification_type='reminder',
-                title=f"Meeting Reminder: {self.reservation.title}",
-                message=self.message,
-                related_reservation=self.reservation
+                reservation=self.reservation,
+                notification_type='reservation_reminder',
+                message=self.message
             )
             
             # Send email reminder
@@ -269,18 +283,3 @@ Conference Room Booking System
             
         except Exception as e:
             logger.error(f"Error sending reminder {self.id}: {e}")
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    phone_number = models.CharField(max_length=20, blank=True)
-    department = models.CharField(max_length=100, blank=True)
-    is_admin = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} Profile"
-
-    @property
-    def full_name(self):
-        return f"{self.user.first_name} {self.user.last_name}".strip() or self.user.username
