@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.management import call_command
 import os
 import sys
 
@@ -58,3 +59,62 @@ def deployment_status(request):
             }
         }
     })
+
+
+@csrf_exempt
+def fix_database(request):
+    """Fix database by running migrations and creating admin user"""
+    try:
+        # Run migrations
+        call_command('migrate', verbosity=0)
+        
+        # Create admin user
+        from django.contrib.auth.models import User
+        from bookings.models import UserProfile
+        
+        admin_user, created = User.objects.get_or_create(
+            username='admin',
+            defaults={
+                'email': 'admin@example.com',
+                'is_staff': True,
+                'is_superuser': True
+            }
+        )
+        
+        if created:
+            admin_user.set_password('admin123')
+            admin_user.save()
+            admin_message = 'Admin user created'
+        else:
+            admin_user.set_password('admin123')
+            admin_user.save()
+            admin_message = 'Admin user updated'
+        
+        # Create UserProfile for admin
+        user_profile, profile_created = UserProfile.objects.get_or_create(
+            user=admin_user,
+            defaults={'is_admin': True}
+        )
+        
+        if profile_created:
+            profile_message = 'Admin profile created'
+        else:
+            user_profile.is_admin = True
+            user_profile.save()
+            profile_message = 'Admin profile updated'
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Database fixed successfully',
+            'details': {
+                'migrations': 'Completed',
+                'admin_user': admin_message,
+                'admin_profile': profile_message
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Database fix failed: {str(e)}'
+        })
