@@ -1,16 +1,8 @@
 from django.urls import path
 from . import views
-from . import test_views
-from . import health_views
-from . import auth_test_views
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('test/', test_views.test_deployment, name='test_deployment'),
-    path('health/', health_views.health_check, name='health_check'),
-    path('create-admin/', health_views.create_admin_endpoint, name='create_admin_endpoint'),
-    path('test-login/', auth_test_views.test_login, name='test_login'),
-    path('test-register/', auth_test_views.test_register, name='test_register'),
     path('register/', views.register, name='register'),
     path('rooms/', views.room_list, name='room_list'),
     path('rooms/<int:room_id>/', views.room_detail, name='room_detail'),
