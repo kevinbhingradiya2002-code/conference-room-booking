@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views
+from . import debug_views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('debug/', debug_views.deployment_status, name='deployment_status'),
     path('register/', views.register, name='register'),
     path('rooms/', views.room_list, name='room_list'),
     path('rooms/<int:room_id>/', views.room_detail, name='room_detail'),
