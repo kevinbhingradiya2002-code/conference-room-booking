@@ -3,6 +3,7 @@ from . import views
 from . import reminder_views
 from . import migration_views
 from . import debug_booking_views
+from . import email_test_views
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -18,6 +19,7 @@ urlpatterns = [
     path('reminders/', reminder_views.reminder_list, name='reminder_list'),
     path('force-migrate/', migration_views.force_migrate, name='force_migrate'),
     path('debug-booking/', debug_booking_views.debug_booking, name='debug_booking'),
+    path('test-email/', email_test_views.test_email, name='test_email'),
     path('manager/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('manager/rooms/', views.admin_room_manage, name='admin_room_manage'),
     path('manager/reservations/', views.admin_reservation_manage, name='admin_reservation_manage'),
