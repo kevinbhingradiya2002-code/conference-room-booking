@@ -118,3 +118,53 @@ def fix_database(request):
             'status': 'error',
             'message': f'Database fix failed: {str(e)}'
         })
+
+
+@csrf_exempt
+def add_sample_rooms(request):
+    """Add sample rooms to the database"""
+    try:
+        from bookings.models import Room
+        
+        # Check if rooms already exist
+        if Room.objects.count() > 0:
+            return JsonResponse({
+                'status': 'info',
+                'message': f'Rooms already exist ({Room.objects.count()} rooms)',
+                'room_count': Room.objects.count()
+            })
+        
+        # Create sample rooms
+        rooms_data = [
+            {'name': 'Conference Room A', 'capacity': 10, 'description': 'Large conference room with projector and whiteboard'},
+            {'name': 'Meeting Room B', 'capacity': 5, 'description': 'Small meeting room with whiteboard'},
+            {'name': 'Executive Boardroom', 'capacity': 15, 'description': 'Premium boardroom with video conferencing'},
+            {'name': 'Training Room C', 'capacity': 20, 'description': 'Spacious room for training sessions'},
+            {'name': 'Huddle Room D', 'capacity': 4, 'description': 'Compact room for quick discussions'},
+            {'name': 'Innovation Lab', 'capacity': 8, 'description': 'Creative space with flexible seating'},
+            {'name': 'Quiet Room E', 'capacity': 2, 'description': 'Private room for focused work'},
+            {'name': 'Presentation Hall', 'capacity': 50, 'description': 'Large hall for presentations and events'},
+            {'name': 'Team Room F', 'capacity': 6, 'description': 'Collaborative space for small teams'},
+            {'name': 'Client Meeting Room', 'capacity': 7, 'description': 'Professional room for client interactions'},
+        ]
+        
+        created_rooms = []
+        for room_data in rooms_data:
+            room = Room.objects.create(**room_data)
+            created_rooms.append({
+                'id': room.id,
+                'name': room.name,
+                'capacity': room.capacity
+            })
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Successfully created {len(created_rooms)} sample rooms',
+            'rooms': created_rooms
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Failed to create rooms: {str(e)}'
+        })
