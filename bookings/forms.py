@@ -54,8 +54,10 @@ class ReservationForm(forms.ModelForm):
             self.fields['room'].required = False
         
         now = timezone.now()
-        self.fields['start_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
-        self.fields['end_time'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
+        # Allow bookings starting from 5 minutes ago to account for time differences
+        min_time = now - timedelta(minutes=5)
+        self.fields['start_time'].widget.attrs['min'] = min_time.strftime('%Y-%m-%dT%H:%M')
+        self.fields['end_time'].widget.attrs['min'] = min_time.strftime('%Y-%m-%dT%H:%M')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -67,8 +69,10 @@ class ReservationForm(forms.ModelForm):
             if start_time >= end_time:
                 raise forms.ValidationError("End time must be after start time.")
             
-            if start_time < timezone.now():
-                raise forms.ValidationError("Cannot create reservation in the past.")
+            # Allow bookings starting from 5 minutes ago to account for time differences
+            min_time = timezone.now() - timedelta(minutes=5)
+            if start_time < min_time:
+                raise forms.ValidationError("Cannot create reservation more than 5 minutes in the past.")
             
             if room and not room.is_available(start_time, end_time):
                 raise forms.ValidationError("Room is not available for the selected time period.")
