@@ -19,8 +19,26 @@ def deployment_status(request):
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
             db_status = "Connected"
+            
+        # Check if admin user exists
+        from django.contrib.auth.models import User
+        from bookings.models import UserProfile
+        
+        admin_exists = User.objects.filter(username='admin').exists()
+        admin_has_profile = False
+        if admin_exists:
+            admin_user = User.objects.get(username='admin')
+            admin_has_profile = hasattr(admin_user, 'profile')
+            
+        user_count = User.objects.count()
+        profile_count = UserProfile.objects.count()
+        
     except Exception as e:
         db_status = f"Error: {str(e)}"
+        admin_exists = False
+        admin_has_profile = False
+        user_count = 0
+        profile_count = 0
     
     return JsonResponse({
         'status': 'success',
@@ -28,6 +46,10 @@ def deployment_status(request):
             'python_version': sys.version,
             'django_version': '4.2.7',
             'database_status': db_status,
+            'admin_exists': admin_exists,
+            'admin_has_profile': admin_has_profile,
+            'user_count': user_count,
+            'profile_count': profile_count,
             'environment_variables': {
                 'DATABASE_URL': 'Set' if database_url != 'Not set' else 'Not set',
                 'SECRET_KEY': 'Set' if secret_key != 'Not set' else 'Not set',
