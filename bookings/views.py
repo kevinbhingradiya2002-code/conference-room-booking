@@ -8,11 +8,14 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime, timedelta
+import logging
 from .models import Room, Reservation, Notification, UserProfile, Reminder
 from .forms import (
     CustomUserCreationForm, UserProfileForm, ReservationForm, 
     ReservationUpdateForm, RoomSearchForm, AdminReservationForm
 )
+
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -88,23 +91,29 @@ def room_detail(request, room_id):
     if request.method == 'POST':
         form = ReservationForm(request.POST, user=request.user, room_id=room.id)
         if form.is_valid():
-            reservation = form.save(commit=False)
-            reservation.user = request.user
-            reservation.room = room
-            reservation.status = 'confirmed'
-            reservation.save()
-            
-            Notification.objects.create(
-                user=request.user,
-                reservation=reservation,
-                notification_type='reservation_confirmed',
-                message=f'Your reservation for {room.name} has been confirmed for {reservation.start_time.strftime("%Y-%m-%d %H:%M")}.'
-            )
-            
-            messages.success(request, 'Reservation created successfully!')
-            return redirect('reservation_detail', reservation.id)
+            try:
+                reservation = form.save(commit=False)
+                reservation.user = request.user
+                reservation.room = room
+                reservation.status = 'confirmed'
+                reservation.save()
+                
+                Notification.objects.create(
+                    user=request.user,
+                    reservation=reservation,
+                    notification_type='reservation_confirmed',
+                    message=f'Your reservation for {room.name} has been confirmed for {reservation.start_time.strftime("%Y-%m-%d %H:%M")}.'
+                )
+                
+                messages.success(request, 'Reservation created successfully!')
+                return redirect('reservation_detail', reservation.id)
+            except Exception as e:
+                messages.error(request, f'Error creating reservation: {str(e)}')
+                logger.error(f"Reservation creation error: {e}")
         else:
             messages.error(request, 'Please check the form for errors.')
+            # Log form errors for debugging
+            logger.error(f"Form errors: {form.errors}")
     else:
         form = ReservationForm(user=request.user, room_id=room.id)
     
