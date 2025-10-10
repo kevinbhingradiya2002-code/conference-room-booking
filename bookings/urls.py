@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import reminder_views
+from . import migration_views
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -14,6 +15,7 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('notifications/', views.notifications, name='notifications'),
     path('reminders/', reminder_views.reminder_list, name='reminder_list'),
+    path('force-migrate/', migration_views.force_migrate, name='force_migrate'),
     path('manager/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('manager/rooms/', views.admin_room_manage, name='admin_room_manage'),
     path('manager/reservations/', views.admin_reservation_manage, name='admin_reservation_manage'),
