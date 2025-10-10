@@ -12,7 +12,7 @@ import logging
 from .models import Room, Reservation, Notification, UserProfile, Reminder
 from .forms import (
     CustomUserCreationForm, UserProfileForm, ReservationForm, 
-    ReservationUpdateForm, RoomSearchForm, AdminReservationForm
+    ReservationUpdateForm, RoomSearchForm, AdminReservationForm, RoomForm
 )
 
 logger = logging.getLogger(__name__)
@@ -291,6 +291,78 @@ def admin_room_manage(request):
     
     rooms = Room.objects.all().order_by('name')
     return render(request, 'bookings/admin_room_manage.html', {'rooms': rooms})
+
+
+@login_required
+def admin_room_add(request):
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = RoomForm(request.POST)
+        if form.is_valid():
+            room = form.save()
+            messages.success(request, f'Room "{room.name}" has been created successfully!')
+            return redirect('admin_room_manage')
+    else:
+        form = RoomForm()
+    
+    return render(request, 'bookings/admin_room_form.html', {
+        'form': form,
+        'title': 'Add New Room',
+        'submit_text': 'Create Room'
+    })
+
+
+@login_required
+def admin_room_edit(request, room_id):
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('home')
+    
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        messages.error(request, 'Room not found.')
+        return redirect('admin_room_manage')
+    
+    if request.method == 'POST':
+        form = RoomForm(request.POST, instance=room)
+        if form.is_valid():
+            room = form.save()
+            messages.success(request, f'Room "{room.name}" has been updated successfully!')
+            return redirect('admin_room_manage')
+    else:
+        form = RoomForm(instance=room)
+    
+    return render(request, 'bookings/admin_room_form.html', {
+        'form': form,
+        'room': room,
+        'title': f'Edit Room: {room.name}',
+        'submit_text': 'Update Room'
+    })
+
+
+@login_required
+def admin_room_delete(request, room_id):
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('home')
+    
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        messages.error(request, 'Room not found.')
+        return redirect('admin_room_manage')
+    
+    if request.method == 'POST':
+        room_name = room.name
+        room.delete()
+        messages.success(request, f'Room "{room_name}" has been deleted successfully!')
+        return redirect('admin_room_manage')
+    
+    return render(request, 'bookings/admin_room_delete.html', {'room': room})
 
 
 @login_required

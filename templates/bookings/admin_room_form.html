@@ -1,0 +1,165 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}{{ title }} - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-door-open"></i> {{ title }}</h1>
+            <a href="{% url 'admin_room_manage' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Room Management
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Room Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">
+                                    <i class="fas fa-door-open"></i> Room Name *
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.name.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.capacity.id_for_label }}" class="form-label">
+                                    <i class="fas fa-users"></i> Capacity *
+                                </label>
+                                {{ form.capacity }}
+                                {% if form.capacity.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.capacity.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.location.id_for_label }}" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Location *
+                        </label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.location.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            <i class="fas fa-info-circle"></i> Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.description.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.amenities.id_for_label }}" class="form-label">
+                            <i class="fas fa-tools"></i> Amenities
+                        </label>
+                        {{ form.amenities }}
+                        {% if form.amenities.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.amenities.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                <i class="fas fa-check-circle"></i> Room is Active
+                            </label>
+                        </div>
+                        {% if form.is_active.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.is_active.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ submit_text }}
+                        </button>
+                        <a href="{% url 'admin_room_manage' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Room Management Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-door-open text-primary"></i> Room Name</h6>
+                    <p class="text-muted small">Choose a clear, descriptive name that users will easily recognize.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-users text-success"></i> Capacity</h6>
+                    <p class="text-muted small">Set the maximum number of people the room can accommodate comfortably.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-map-marker-alt text-warning"></i> Location</h6>
+                    <p class="text-muted small">Include floor, building, or specific area to help users find the room.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-tools text-info"></i> Amenities</h6>
+                    <p class="text-muted small">List available equipment like projectors, whiteboards, video conferencing, etc.</p>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Note:</strong> Inactive rooms will not appear in the room list for users to book.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

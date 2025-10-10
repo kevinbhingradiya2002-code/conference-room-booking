@@ -1,0 +1,113 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Delete Room - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-exclamation-triangle text-danger"></i> Delete Room</h1>
+            <a href="{% url 'admin_room_manage' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Room Management
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirm Room Deletion</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-warning"></i> Warning!</h6>
+                    <p class="mb-0">You are about to permanently delete the room <strong>"{{ room.name }}"</strong>. This action cannot be undone.</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6>Room Details:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ room.name }}</p>
+                            <p><strong>Capacity:</strong> {{ room.capacity }} people</p>
+                            <p><strong>Location:</strong> {{ room.location }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> 
+                                {% if room.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Created:</strong> {{ room.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if room.description %}
+                        <p><strong>Description:</strong> {{ room.description }}</p>
+                    {% endif %}
+                    
+                    {% if room.amenities %}
+                        <p><strong>Amenities:</strong> {{ room.amenities }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-info-circle"></i> Important:</h6>
+                    <ul class="mb-0">
+                        <li>All future reservations for this room will be cancelled</li>
+                        <li>Past reservation history will be preserved</li>
+                        <li>Users will no longer be able to book this room</li>
+                        <li>This action cannot be undone</li>
+                    </ul>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Yes, Delete Room
+                        </button>
+                        <a href="{% url 'admin_room_manage' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Alternative Options</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-toggle-off text-warning"></i> Deactivate Instead</h6>
+                    <p class="text-muted small">Consider deactivating the room instead of deleting it. This will hide it from users but preserve all data.</p>
+                    <a href="{% url 'admin_room_edit' room.id %}" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-edit"></i> Edit Room
+                    </a>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-history text-info"></i> Check Reservations</h6>
+                    <p class="text-muted small">Review any upcoming reservations before deleting the room.</p>
+                    <a href="{% url 'admin_reservation_manage' %}?room={{ room.id }}" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-calendar"></i> View Reservations
+                    </a>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Tip:</strong> If you're unsure, deactivate the room first and delete it later if needed.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
