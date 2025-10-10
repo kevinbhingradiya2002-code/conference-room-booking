@@ -34,12 +34,21 @@ def deployment_status(request):
         user_count = User.objects.count()
         profile_count = UserProfile.objects.count()
         
+        # Check rooms
+        from bookings.models import Room
+        room_count = Room.objects.count()
+        rooms_list = []
+        if room_count > 0:
+            rooms_list = list(Room.objects.values('id', 'name', 'capacity', 'is_active')[:5])
+        
     except Exception as e:
         db_status = f"Error: {str(e)}"
         admin_exists = False
         admin_has_profile = False
         user_count = 0
         profile_count = 0
+        room_count = 0
+        rooms_list = []
     
     return JsonResponse({
         'status': 'success',
@@ -51,6 +60,8 @@ def deployment_status(request):
             'admin_has_profile': admin_has_profile,
             'user_count': user_count,
             'profile_count': profile_count,
+            'room_count': room_count,
+            'rooms_sample': rooms_list,
             'environment_variables': {
                 'DATABASE_URL': 'Set' if database_url != 'Not set' else 'Not set',
                 'SECRET_KEY': 'Set' if secret_key != 'Not set' else 'Not set',
@@ -127,11 +138,14 @@ def add_sample_rooms(request):
         from bookings.models import Room
         
         # Check if rooms already exist
-        if Room.objects.count() > 0:
+        existing_count = Room.objects.count()
+        if existing_count > 0:
+            existing_rooms = list(Room.objects.values('id', 'name', 'capacity', 'is_active'))
             return JsonResponse({
                 'status': 'info',
-                'message': f'Rooms already exist ({Room.objects.count()} rooms)',
-                'room_count': Room.objects.count()
+                'message': f'Rooms already exist ({existing_count} rooms)',
+                'room_count': existing_count,
+                'rooms': existing_rooms
             })
         
         # Create sample rooms
@@ -154,12 +168,18 @@ def add_sample_rooms(request):
             created_rooms.append({
                 'id': room.id,
                 'name': room.name,
-                'capacity': room.capacity
+                'capacity': room.capacity,
+                'is_active': room.is_active,
+                'description': room.description
             })
+        
+        # Verify creation
+        total_rooms = Room.objects.count()
         
         return JsonResponse({
             'status': 'success',
             'message': f'Successfully created {len(created_rooms)} sample rooms',
+            'total_rooms_in_db': total_rooms,
             'rooms': created_rooms
         })
         
