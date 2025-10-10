@@ -131,6 +131,11 @@ class Reservation(models.Model):
     def send_confirmation_email(self):
         """Send email confirmation for the reservation"""
         try:
+            # Check if user has email
+            if not self.user.email:
+                logger.warning(f"User {self.user.username} has no email address")
+                return
+                
             subject = f"Reservation Confirmed: {self.title}"
             message = f"""
 Hello {self.user.get_full_name() or self.user.username},
@@ -159,7 +164,7 @@ Conference Room Booking System
                 fail_silently=True,
             )
             
-            logger.info(f"Confirmation email sent for reservation {self.id}")
+            logger.info(f"Confirmation email sent for reservation {self.id} to {self.user.email}")
             
         except Exception as e:
             logger.error(f"Error sending confirmation email for reservation {self.id}: {e}")
