@@ -28,7 +28,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -54,7 +54,7 @@
       <option name="presentableId" value="Default" />
       <updated>1759903687680</updated>
       <workItem from="1759903688766" duration="3085000" />
-      <workItem from="1759968291432" duration="1690000" />
+      <workItem from="1759968291432" duration="2304000" />
     </task>
     <servers />
   </component>

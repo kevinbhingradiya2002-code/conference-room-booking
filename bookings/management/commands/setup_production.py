@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from bookings.models import Room, Reservation, Notification
+from bookings.models import Room, Reservation, Notification, UserProfile
 import os
 
 
@@ -17,13 +17,22 @@ class Command(BaseCommand):
             
             self.stdout.write('Creating admin user...')
             if not User.objects.filter(username='admin').exists():
-                User.objects.create_superuser(
+                admin_user = User.objects.create_superuser(
                     username='admin',
                     email='admin@example.com',
                     password='admin123'
                 )
+                UserProfile.objects.create(user=admin_user, is_admin=True)
                 self.stdout.write('Admin user created: admin/admin123')
             else:
+                admin_user = User.objects.get(username='admin')
+                if not hasattr(admin_user, 'profile'):
+                    UserProfile.objects.create(user=admin_user, is_admin=True)
+                    self.stdout.write('Admin profile created')
+                else:
+                    admin_user.profile.is_admin = True
+                    admin_user.profile.save()
+                    self.stdout.write('Admin profile updated')
                 self.stdout.write('Admin user already exists')
             
             self.stdout.write('Creating sample rooms...')
