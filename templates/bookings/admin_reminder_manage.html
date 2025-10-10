@@ -1,0 +1,152 @@
+{% extends 'bookings/base.html' %}
+{% load static %}
+
+{% block title %}Manage Reminders{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-bell"></i> Manage Reminders</h2>
+                <div>
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filter Options -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="type" class="form-label">Reminder Type</label>
+                            <select name="type" id="type" class="form-select">
+                                <option value="">All Types</option>
+                                {% for type_code, type_name in reminder_types %}
+                                    <option value="{{ type_code }}" {% if request.GET.type == type_code %}selected{% endif %}>
+                                        {{ type_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sent" class="form-label">Status</label>
+                            <select name="sent" id="sent" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="true" {% if request.GET.sent == 'true' %}selected{% endif %}>Sent</option>
+                                <option value="false" {% if request.GET.sent == 'false' %}selected{% endif %}>Pending</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+                            <a href="{% url 'admin_reminder_manage' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if reminders %}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Meeting</th>
+                                        <th>Room</th>
+                                        <th>Reminder Type</th>
+                                        <th>Scheduled Time</th>
+                                        <th>Status</th>
+                                        <th>Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reminder in reminders %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ reminder.reservation.user.get_full_name|default:reminder.reservation.user.username }}</strong><br>
+                                                <small class="text-muted">{{ reminder.reservation.user.email }}</small>
+                                            </td>
+                                            <td>
+                                                <strong>{{ reminder.reservation.title }}</strong><br>
+                                                <small class="text-muted">{{ reminder.reservation.start_time|date:"M d, Y H:i" }}</small>
+                                            </td>
+                                            <td>{{ reminder.reservation.room.name }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if reminder.reminder_type == '24h' %}bg-info
+                                                    {% elif reminder.reminder_type == '1h' %}bg-warning
+                                                    {% elif reminder.reminder_type == '15m' %}bg-danger
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ reminder.get_reminder_type_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{ reminder.reminder_time|date:"M d, Y H:i" }}
+                                                {% if reminder.sent_at %}
+                                                    <br><small class="text-success">Sent: {{ reminder.sent_at|date:"M d, Y H:i" }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if reminder.is_sent %}
+                                                    <span class="badge bg-success">Sent</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ reminder.message }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Reminder pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.sent %}&sent={{ request.GET.sent }}{% endif %}">&laquo; First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.sent %}&sent={{ request.GET.sent }}{% endif %}">Previous</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.sent %}&sent={{ request.GET.sent }}{% endif %}">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.sent %}&sent={{ request.GET.sent }}{% endif %}">Last &raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h4>No Reminders Found</h4>
+                    <p>No reminders match your current filter criteria.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

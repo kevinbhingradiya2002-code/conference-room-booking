@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import Room, Reservation, Notification, UserProfile
+from .models import Room, Reservation, Notification, UserProfile, Reminder
 from .forms import (
     CustomUserCreationForm, UserProfileForm, ReservationForm, 
     ReservationUpdateForm, RoomSearchForm, AdminReservationForm
@@ -253,6 +253,7 @@ def admin_dashboard(request):
     total_reservations = Reservation.objects.count()
     active_reservations = Reservation.objects.filter(status='confirmed').count()
     total_users = User.objects.count()
+    total_reminders = Reminder.objects.filter(is_sent=False).count()
     
     recent_reservations = Reservation.objects.order_by('-created_at')[:10]
     
@@ -266,6 +267,7 @@ def admin_dashboard(request):
         'total_reservations': total_reservations,
         'active_reservations': active_reservations,
         'total_users': total_users,
+        'total_reminders': total_reminders,
         'recent_reservations': recent_reservations,
         'upcoming_reservations': upcoming_reservations,
     }
