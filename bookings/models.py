@@ -156,7 +156,7 @@ Conference Room Booking System
                 message,
                 settings.DEFAULT_FROM_EMAIL,
                 [self.user.email],
-                fail_silently=False,
+                fail_silently=True,
             )
             
             logger.info(f"Confirmation email sent for reservation {self.id}")
@@ -272,7 +272,7 @@ Conference Room Booking System
                 email_message,
                 settings.DEFAULT_FROM_EMAIL,
                 [self.reservation.user.email],
-                fail_silently=False,
+                fail_silently=True,
             )
             
             self.is_sent = True
