@@ -19,21 +19,30 @@ logger = logging.getLogger(__name__)
 
 
 def home(request):
-    rooms = Room.objects.filter(is_active=True)[:6]
-    upcoming_reservations = []
-    
-    if request.user.is_authenticated:
-        upcoming_reservations = Reservation.objects.filter(
-            user=request.user,
-            start_time__gte=timezone.now(),
-            status='confirmed'
-        ).order_by('start_time')[:5]
-    
-    context = {
-        'rooms': rooms,
-        'upcoming_reservations': upcoming_reservations,
-    }
-    return render(request, 'bookings/home.html', context)
+    try:
+        rooms = Room.objects.filter(is_active=True)[:6]
+        upcoming_reservations = []
+        
+        if request.user.is_authenticated:
+            upcoming_reservations = Reservation.objects.filter(
+                user=request.user,
+                start_time__gte=timezone.now(),
+                status='confirmed'
+            ).order_by('start_time')[:5]
+        
+        context = {
+            'rooms': rooms,
+            'upcoming_reservations': upcoming_reservations,
+        }
+        return render(request, 'bookings/home.html', context)
+    except Exception as e:
+        logger.error(f"Error in home view: {e}", exc_info=True)
+        # Return a basic error page or redirect
+        return render(request, 'bookings/home.html', {
+            'rooms': [],
+            'upcoming_reservations': [],
+            'error': 'Unable to load rooms. Please try again later.'
+        })
 
 
 def register(request):
